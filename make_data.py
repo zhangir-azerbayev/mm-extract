@@ -7,6 +7,10 @@ from tqdm import tqdm
 import json 
 import ndjson
 
+import random 
+
+random.seed(20)
+
 def make_proof_dict(path): 
     with open(path) as f: 
         proofs = f.read()
@@ -36,14 +40,29 @@ def replace_proof_of_key(key, new_proof, set_mm):
 
 
 def main():
+    held_out_number = 1000
+
     proof_dict = make_proof_dict("proofs.txt")
+    
+    decls = list(proof_dict.keys())
+    random.shuffle(decls)
+    held_out_decls = decls[:1000]
+
+    with open("test_decls.json", "w") as f: 
+        f.write(json.dumps(held_out_decls[:held_out_number//2], indent=4))
+    with open("valid_decls.json", "w") as f: 
+        f.write(json.dumps(held_out_decls[held_out_number//2:], indent=4))
 
     with open("metamath-0.198/set.mm") as f: 
         set_mm = f.read()
+
     
     # I know this for loop is horrible but I only need to run it once 
     for key in tqdm(proof_dict): 
-        set_mm = replace_proof_of_key(key, proof_dict[key], set_mm)
+        if key not in held_out_decls: 
+            set_mm = replace_proof_of_key(key, proof_dict[key], set_mm)
+        else: 
+            set_mm = replace_proof_of_key(key, "?", set_mm)
 
     with open("human-readable.mm", "w") as f: 
         f.write(set_mm)
