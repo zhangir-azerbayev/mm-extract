@@ -33,7 +33,8 @@ def replace_proof_of_key(key, new_proof, set_mm):
         rest = set_mm[sep:]
         pattern = re.compile(r"\$=.*?\$\.", re.DOTALL)
         #print("GROUP: ", re.search(pattern, rest).group())
-        rest = re.sub(pattern, "$=" + " "*6 + new_proof.replace("\n", "\n" + " "*6) + " $.", 
+        # tried removing the " "*6 after "$=" bc I think its extraneous
+        rest = re.sub(pattern, "$=" + new_proof.replace("\n", "\n" + " "*6) + " $.", 
                 rest, count=1)
         #print("REST:\n", rest[:1000])
 
@@ -43,13 +44,13 @@ def replace_proof_of_key(key, new_proof, set_mm):
 
 
 def main():
-    held_out_number = 1000
+    held_out_number = 2000
 
     proof_dict = make_proof_dict("proofs.txt")
     
     decls = list(proof_dict.keys())
     random.shuffle(decls)
-    held_out_decls = decls[:1000]
+    held_out_decls = decls[:held_out_number]
 
     with open("test_decls.json", "w") as f: 
         f.write(json.dumps(held_out_decls[:held_out_number//2], indent=4))
